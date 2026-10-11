@@ -83,3 +83,23 @@ export interface StatusResponse {
     isSyncing: boolean;
   };
 }
+
+export interface TranslateVacancyPayload {
+  title?: string;
+  description?: string;
+  requirements?: string[];
+  experience?: string;
+  location?: string;
+  text?: string;
+}
+
+export interface TranslatedVacancyData {
+  title?: string;
+  description?: string;
+  requirements?: string[];
+  experience?: string;
+  location?: string;
+  text?: string;
+  targetLang: string;
+}
+

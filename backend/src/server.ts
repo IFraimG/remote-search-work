@@ -4,6 +4,7 @@ import helmet from '@fastify/helmet';
 import sensible from '@fastify/sensible';
 import { config } from './config/env.js';
 import { vacanciesRoutes } from './modules/vacancies/vacancies.routes.js';
+import { translateRoutes } from './modules/translate/translate.routes.js';
 
 export async function buildServer(): Promise<FastifyInstance> {
   const server = Fastify({
@@ -49,6 +50,9 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Register Vacancies module routes
   await server.register(vacanciesRoutes);
+
+  // Register Translation module routes
+  await server.register(translateRoutes);
 
   return server;
 }
