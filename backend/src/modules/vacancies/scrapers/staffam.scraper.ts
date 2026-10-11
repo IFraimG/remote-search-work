@@ -1,7 +1,20 @@
-import * as cheerio from 'cheerio';
 import { request } from 'undici';
 import { BaseScraper } from './base.scraper.js';
 import { Vacancy, EmploymentType } from '../types.js';
+
+interface StaffAmJobItem {
+  id: number;
+  title?: { en?: string; ru?: string; am?: string };
+  companiesStruct?: { title?: { en?: string; ru?: string; am?: string } };
+  job_city?: { title?: { en?: string; ru?: string; am?: string } };
+  is_remote?: boolean;
+  salary_from?: number | null;
+  salary_to?: number | null;
+  salary_currency?: string | null;
+  category?: { code?: string; title?: { en?: string; ru?: string } };
+  slug?: { en?: string; ru?: string; am?: string };
+  activated_at?: { staffam?: string };
+}
 
 export class StaffAmScraper extends BaseScraper {
   readonly id = 'staffam_armenia';
@@ -24,96 +37,84 @@ export class StaffAmScraper extends BaseScraper {
             Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.9,hy;q=0.8',
           },
-          headersTimeout: 8000,
-          bodyTimeout: 8000,
+          headersTimeout: 10000,
+          bodyTimeout: 10000,
         });
 
-        if (statusCode !== 200) {
-          continue;
-        }
+        if (statusCode !== 200) continue;
 
         const html = await body.text();
-        const $ = cheerio.load(html);
+        const nextDataMatch = html.match(/<script id="__NEXT_DATA__" type="application\/json">(.*?)<\/script>/);
 
-        // Parse search items on staff.am
-        $('.job-inner, .load-more-item, [data-key], div.job_list_item').each((_, element) => {
-          const $el = $(element);
-          const title = this.cleanText(
-            $el.find('.job_title, h2, h3, a.font_heavy, [class*="title"]').first().text()
-          );
-          if (!title || title.length < 3) return;
+        if (nextDataMatch) {
+          const nextJson = JSON.parse(nextDataMatch[1]);
+          const jobs: StaffAmJobItem[] = nextJson.props?.pageProps?.jobs || [];
 
-          const linkHref =
-            $el.find('a[href*="/en/job/"], a[href*="/jobs/"], a.font_heavy').first().attr('href') || '';
-          if (!linkHref) return;
+          for (const item of jobs) {
+            const title = item.title?.en || item.title?.ru || item.title?.am;
+            if (!title) continue;
 
-          const sourceUrl = linkHref.startsWith('http')
-            ? linkHref
-            : `https://staff.am${linkHref}`;
+            const company =
+              item.companiesStruct?.title?.en ||
+              item.companiesStruct?.title?.ru ||
+              'Компания в Армении';
 
-          const company =
-            this.cleanText(
-              $el.find('.job_list_company_title, [class*="company"], .company-title').first().text()
-            ) || 'IT Company (Armenia)';
+            const city = item.job_city?.title?.en || item.job_city?.title?.ru || 'Yerevan';
+            const location = `${city}, Armenia`;
+            const categoryCode = item.category?.code || 'it';
+            const slug = item.slug?.en || item.slug?.ru || String(item.id);
+            const sourceUrl = `https://staff.am/en/jobs/${categoryCode}/${slug}`;
 
-          const locationText = this.cleanText(
-            $el.find('.job_location, [class*="location"], .city_title').first().text()
-          );
+            const cur = item.salary_currency || 'AMD';
+            let rawSalary = 'По договоренности';
+            if (item.salary_from && item.salary_to) {
+              rawSalary = `${item.salary_from.toLocaleString()} - ${item.salary_to.toLocaleString()} ${cur}`;
+            } else if (item.salary_from) {
+              rawSalary = `от ${item.salary_from.toLocaleString()} ${cur}`;
+            } else if (item.salary_to) {
+              rawSalary = `до ${item.salary_to.toLocaleString()} ${cur}`;
+            }
 
-          const rawDesc = this.cleanText(
-            $el.find('.job_description, p, [class*="description"]').first().text()
-          );
+            const empType: EmploymentType = item.is_remote ? 'remote' : 'office';
+            const spec = this.matchSpecialization(title);
+            const id = `staffam_${item.id}`;
 
-          const rawSalary = this.cleanText(
-            $el.find('.salary, [class*="salary"]').first().text()
-          );
-
-          let empType: EmploymentType = 'office';
-          const fullText = (title + ' ' + locationText + ' ' + rawDesc).toLowerCase();
-          if (fullText.includes('remote') || fullText.includes('work from home')) {
-            empType = 'remote';
-          } else if (fullText.includes('hybrid')) {
-            empType = 'hybrid';
+            if (!vacancies.some((v) => v.sourceUrl === sourceUrl)) {
+              vacancies.push({
+                id,
+                title,
+                company,
+                description: `Вакансия ${title} в компании ${company} (${location}). Подробности и отклик на Staff.am.`,
+                location,
+                country: 'armenia',
+                city,
+                employmentType: empType,
+                salary: {
+                  raw: rawSalary,
+                  currency: cur,
+                  min: item.salary_from || undefined,
+                  max: item.salary_to || undefined,
+                  isNegotiable: !item.salary_from && !item.salary_to,
+                },
+                requirements: [
+                  'Опыт коммерческой веб-разработки',
+                  'Знание современного стека технологий и фреймворков',
+                ],
+                experience: title.toLowerCase().includes('senior')
+                  ? 'Senior (3+ года)'
+                  : title.toLowerCase().includes('junior')
+                  ? 'Junior (1+ год)'
+                  : 'Middle (2+ года)',
+                source: 'Staff.am',
+                sourceUrl,
+                category: 'it',
+                specialization: spec,
+                tags: ['Армения', 'Staff.am', spec, empType],
+                scrapedAt: new Date().toISOString(),
+              });
+            }
           }
-
-          const spec = this.matchSpecialization(title + ' ' + rawDesc);
-          const id = `staffam_${Buffer.from(sourceUrl).toString('base64url').slice(-24)}`;
-
-          if (!vacancies.some((v) => v.sourceUrl === sourceUrl)) {
-            vacancies.push({
-              id,
-              title,
-              company,
-              description: rawDesc || `Vacancy for ${title} at ${company} in Armenia. See details on Staff.am`,
-              location: locationText || 'Yerevan, Armenia',
-              country: 'armenia',
-              city: locationText.includes('Yerevan') || locationText.includes('Երևան')
-                ? 'Yerevan'
-                : locationText || 'Armenia',
-              employmentType: empType,
-              salary: {
-                raw: rawSalary || 'Negotiable',
-                currency: rawSalary.includes('$') || rawSalary.includes('USD') ? 'USD' : 'AMD',
-                isNegotiable: !rawSalary,
-              },
-              requirements: [
-                'Bachelor degree in Computer Science or equivalent',
-                'Demonstrated hands-on experience in modern frontend/fullstack stack',
-              ],
-              experience: fullText.includes('senior')
-                ? 'Senior (3+ years)'
-                : fullText.includes('junior')
-                ? 'Junior (1+ years)'
-                : 'Mid-level (2+ years)',
-              source: 'Staff.am',
-              sourceUrl,
-              category: 'it',
-              specialization: spec,
-              tags: ['Armenia', 'IT', spec, empType],
-              scrapedAt: new Date().toISOString(),
-            });
-          }
-        });
+        }
       } catch (e) {
         console.warn(`Staff.am scrape keyword "${keyword}" issue:`, e instanceof Error ? e.message : e);
       }
