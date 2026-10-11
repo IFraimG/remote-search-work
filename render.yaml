@@ -4,8 +4,8 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: corepack enable && pnpm install --filter backend... && pnpm --filter backend build
-    startCommand: pnpm --filter backend start
+    buildCommand: pnpm install --frozen-lockfile=false && pnpm --filter ./backend build
+    startCommand: node backend/dist/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
