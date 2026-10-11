@@ -103,3 +103,20 @@ export interface TranslatedVacancyData {
   targetLang: string;
 }
 
+export interface CurrencyRateItem {
+  code: string;
+  name: string;
+  source: string;
+  rate: string;
+  rawRate: number;
+  delta?: string;
+  direction: 'up' | 'down' | 'same';
+  symbol?: string;
+}
+
+export interface RatesResponse {
+  updatedAt: string;
+  rates: CurrencyRateItem[];
+}
+
+

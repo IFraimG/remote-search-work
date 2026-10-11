@@ -5,6 +5,7 @@ import sensible from '@fastify/sensible';
 import { config } from './config/env.js';
 import { vacanciesRoutes } from './modules/vacancies/vacancies.routes.js';
 import { translateRoutes } from './modules/translate/translate.routes.js';
+import { ratesRoutes } from './modules/rates/rates.routes.js';
 
 export async function buildServer(): Promise<FastifyInstance> {
   const server = Fastify({
@@ -53,6 +54,9 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Register Translation module routes
   await server.register(translateRoutes);
+
+  // Register Currency Rates module routes
+  await server.register(ratesRoutes);
 
   return server;
 }

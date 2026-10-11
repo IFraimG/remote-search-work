@@ -112,3 +112,15 @@ export async function translateVacancyData(
   return res.data;
 }
 
+export async function fetchCurrencyRates(): Promise<import('../types/index.js').RatesResponse> {
+  const endpoint = `${API_BASE_URL}/api/rates`;
+  const response = await fetch(endpoint, {
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  return handleResponse<import('../types/index.js').RatesResponse>(response, endpoint);
+}
+
+

@@ -19,16 +19,23 @@ import { CourierInfostudScraper } from './courier-infostud.scraper.js';
 import { CourierLakoDoPoslaScraper } from './courier-lakodoposla.scraper.js';
 import { CourierStaffAmScraper } from './courier-staffam.scraper.js';
 import { CourierJobAmScraper } from './courier-jobam.scraper.js';
+import { LinkedInSerbiaScraper } from './linkedin-serbia.scraper.js';
+import { LinkedInArmeniaScraper } from './linkedin-armenia.scraper.js';
+import { LinkedInRemoteScraper } from './linkedin-remote.scraper.js';
+import { LinkedInCourierSerbiaScraper } from './linkedin-courier-serbia.scraper.js';
+import { LinkedInCourierArmeniaScraper } from './linkedin-courier-armenia.scraper.js';
 
 export function createDefaultScrapers(): BaseScraper[] {
   return [
     // Serbia IT
     new InfostudScraper(),
     new LakoDoPoslaScraper(),
+    new LinkedInSerbiaScraper(),
     // Armenia IT
     new StaffAmScraper(),
     new JobAmScraper(),
     new CareerCenterScraper(),
+    new LinkedInArmeniaScraper(),
     // Georgia IT (CIS)
     new JobsGeScraper(),
     new HrGeScraper(),
@@ -42,11 +49,14 @@ export function createDefaultScrapers(): BaseScraper[] {
     new RemoteRocketshipScraper(),
     new HabrCareerScraper(),
     new VSetiScraper(),
+    new LinkedInRemoteScraper(),
     // Couriers (Serbia & Armenia)
     new CourierInfostudScraper(),
     new CourierLakoDoPoslaScraper(),
+    new LinkedInCourierSerbiaScraper(),
     new CourierStaffAmScraper(),
     new CourierJobAmScraper(),
+    new LinkedInCourierArmeniaScraper(),
   ];
 }
 
@@ -72,4 +82,9 @@ export {
   CourierLakoDoPoslaScraper,
   CourierStaffAmScraper,
   CourierJobAmScraper,
+  LinkedInSerbiaScraper,
+  LinkedInArmeniaScraper,
+  LinkedInRemoteScraper,
+  LinkedInCourierSerbiaScraper,
+  LinkedInCourierArmeniaScraper,
 };
