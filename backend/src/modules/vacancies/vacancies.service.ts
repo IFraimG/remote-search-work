@@ -89,25 +89,47 @@ export class VacanciesService {
     if (query.country && query.country !== 'all') {
       const countryQuery = query.country.toLowerCase();
 
-      if (countryQuery === 'europe_and_usa') {
-        // European countries + USA + allowed CIS (Georgia, Armenia, Uzbekistan)
-        filtered = filtered.filter(
-          (v) =>
-            v.country !== 'serbia' && // Serbia has its own page
-            (v.country === 'usa' ||
-              v.country === 'germany' ||
-              v.country === 'uk' ||
-              v.country === 'netherlands' ||
-              v.country === 'poland' ||
-              v.country === 'france' ||
-              v.country === 'spain' ||
-              v.country === 'georgia' ||
-              v.country === 'uzbekistan' ||
-              v.country === 'global_remote')
-        );
-      } else {
-        filtered = filtered.filter((v) => v.country.toLowerCase() === countryQuery);
-      }
+      filtered = filtered.filter((v) => {
+        const vc = v.country.toLowerCase();
+        if (countryQuery === 'europe_and_usa') {
+          // Exclude Serbia (has its own page), include European countries, USA, CIS and global remote
+          return vc !== 'serbia' && vc !== 'rs';
+        }
+        if (countryQuery === 'serbia' || countryQuery === 'rs') {
+          return vc === 'serbia' || vc === 'rs';
+        }
+        if (countryQuery === 'armenia' || countryQuery === 'am') {
+          return vc === 'armenia' || vc === 'am';
+        }
+        if (countryQuery === 'georgia' || countryQuery === 'ge') {
+          return vc === 'georgia' || vc === 'ge';
+        }
+        if (countryQuery === 'uzbekistan' || countryQuery === 'uz') {
+          return vc === 'uzbekistan' || vc === 'uz';
+        }
+        if (countryQuery === 'usa' || countryQuery === 'us') {
+          return vc === 'usa' || vc === 'us';
+        }
+        if (countryQuery === 'germany' || countryQuery === 'de') {
+          return vc === 'germany' || vc === 'de';
+        }
+        if (countryQuery === 'uk' || countryQuery === 'gb') {
+          return vc === 'uk' || vc === 'gb';
+        }
+        if (countryQuery === 'netherlands' || countryQuery === 'nl') {
+          return vc === 'netherlands' || vc === 'nl';
+        }
+        if (countryQuery === 'poland' || countryQuery === 'pl') {
+          return vc === 'poland' || vc === 'pl';
+        }
+        if (countryQuery === 'france' || countryQuery === 'fr') {
+          return vc === 'france' || vc === 'fr';
+        }
+        if (countryQuery === 'spain' || countryQuery === 'es') {
+          return vc === 'spain' || vc === 'es';
+        }
+        return vc === countryQuery;
+      });
     }
 
     // 3. Filter by specialization

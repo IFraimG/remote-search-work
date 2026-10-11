@@ -90,3 +90,25 @@ export async function triggerRefresh(): Promise<void> {
   });
   return handleResponse<void>(response, endpoint);
 }
+
+export async function translateVacancyData(
+  payload: import('../types/index.js').TranslateVacancyPayload
+): Promise<import('../types/index.js').TranslatedVacancyData> {
+  const endpoint = `${API_BASE_URL}/api/translate`;
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const res = await handleResponse<{
+    success: boolean;
+    data: import('../types/index.js').TranslatedVacancyData;
+  }>(response, endpoint);
+
+  return res.data;
+}
+
