@@ -83,7 +83,7 @@ export class JobAmScraper extends BaseScraper {
               currency: 'AMD',
               isNegotiable: true,
             },
-            requirements: ['JavaScript / TypeScript', 'React / Vue / Node.js', 'English'],
+            requirements: this.extractRequirements(title, snippet),
             experience: lower.includes('senior') ? 'Senior (3+ years)' : lower.includes('junior') ? 'Junior' : 'Middle (1-3 years)',
             source: this.name,
             sourceUrl: fullUrl,

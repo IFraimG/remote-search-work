@@ -92,10 +92,7 @@ export class CourierStaffAmScraper extends BaseScraper {
                   max: item.salary_to || undefined,
                   isNegotiable: !item.salary_from && !item.salary_to,
                 },
-                requirements: [
-                  'Знание города и умение ориентироваться по навигатору',
-                  'Личный транспорт (авто/мото/скутер/велосипед) либо пеший курьер',
-                ],
+                requirements: this.extractRequirements(title, `Доставка курьером в компании ${company} (${location}).`),
                 experience: 'Без опыта / от 3 месяцев',
                 source: 'Staff.am (Courier)',
                 sourceUrl,

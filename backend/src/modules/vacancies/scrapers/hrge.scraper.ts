@@ -58,12 +58,13 @@ export class HrGeScraper extends BaseScraper {
           const locationText = 'Tbilisi / Batumi, Georgia';
           const lower = title.toLowerCase();
           const spec = this.matchSpecialization(title);
+          const description = `Вакансия ${title} в компании ${company} (Грузия). Доступно для специалистов в Тбилиси, Батуми и удаленно.`;
 
           vacancies.push({
             id: `hrge-${Math.abs(this.hashCode(fullUrl))}`,
             title,
             company,
-            description: `Вакансия ${title} в компании ${company} (Грузия). Доступно для специалистов в Тбилиси, Батуми и удаленно.`,
+            description,
             location: locationText,
             country: 'GE',
             employmentType: lower.includes('remote') ? 'remote' : 'hybrid',
@@ -72,8 +73,8 @@ export class HrGeScraper extends BaseScraper {
               currency: 'GEL',
               isNegotiable: true,
             },
-            requirements: ['Frontend / Web Stack', 'JavaScript / TypeScript', 'Командная работа'],
-            experience: lower.includes('senior') ? 'Senior (3+ years)' : 'Middle',
+            requirements: this.extractRequirements(title, description),
+            experience: lower.includes('senior') ? 'Senior (3+ years)' : lower.includes('junior') ? 'Junior' : 'Middle',
             source: this.name,
             sourceUrl: fullUrl,
             category: this.category,

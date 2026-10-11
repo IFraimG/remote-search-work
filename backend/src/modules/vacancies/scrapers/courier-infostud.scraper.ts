@@ -86,10 +86,7 @@ export class CourierInfostudScraper extends BaseScraper {
                 currency: 'RSD',
                 isNegotiable: !rawSalary,
               },
-              requirements: [
-                'Vozačka dozvola (B kategorija) ili sopstveno vozilo/skuter/bicikl',
-                'Odgovornost i tačnost pri isporuci pošiljki',
-              ],
+              requirements: this.extractRequirements(title, rawDesc),
               experience: 'Bez iskustva / Sa iskustvom',
               source: 'Poslovi Infostud (Kurir)',
               sourceUrl,

@@ -78,7 +78,7 @@ export class VSetiScraper extends BaseScraper {
             currency: 'RUB',
             isNegotiable: true,
           },
-          requirements: ['Vue 3 / React / TypeScript', 'REST / GraphQL', 'Опыт в коммерческих проектах'],
+          requirements: this.extractRequirements(title, `Удаленная вакансия ${title} в компании ${company}.`),
           experience: lower.includes('senior') ? 'Senior (3+ года)' : 'Middle+',
           source: this.name,
           sourceUrl: fullUrl,

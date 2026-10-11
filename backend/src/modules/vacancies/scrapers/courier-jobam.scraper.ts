@@ -70,7 +70,7 @@ export class CourierJobAmScraper extends BaseScraper {
               min: 180000,
               max: 350000,
             },
-            requirements: ['Личный транспорт (авто/мото/вело) или пеший', 'Знание Еревана', 'Пунктуальность'],
+            requirements: this.extractRequirements(title, `Доставка заказов и документов по Еревану в компании ${company}.`),
             experience: 'Без опыта',
             source: this.name,
             sourceUrl: fullUrl,

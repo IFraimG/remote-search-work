@@ -131,10 +131,11 @@ export class HimalayasScraper extends BaseScraper {
           max: job.maxSalary || undefined,
           isNegotiable: !job.minSalary && !job.maxSalary,
         },
-        requirements: [
-          'Коммерческий опыт разработки на современном стеке',
-          'Опыт работы в распределенной интернациональной команде',
-        ],
+        requirements: this.extractRequirements(
+          job.title,
+          job.excerpt || '',
+          (job.categories || []).map((c) => c.name)
+        ),
         experience,
         source: 'Himalayas',
         sourceUrl: job.applicationLink,

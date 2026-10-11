@@ -80,7 +80,7 @@ export class ReedUkScraper extends BaseScraper {
               currency: 'GBP',
               isNegotiable: true,
             },
-            requirements: ['JavaScript / TypeScript', 'React / Vue / Node.js', 'Agile'],
+            requirements: this.extractRequirements(title, description),
             experience: lower.includes('senior') ? 'Senior (3-5+ years)' : 'Middle Developer',
             source: this.name,
             sourceUrl: fullUrl,

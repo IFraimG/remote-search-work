@@ -76,7 +76,7 @@ export class ItJobsPtScraper extends BaseScraper {
             min: 35000,
             max: 70000,
           },
-          requirements: ['JavaScript / TypeScript', 'React / Vue / Node.js', 'English / European remote'],
+          requirements: this.extractRequirements(title, description),
           experience: lower.includes('senior') ? 'Senior (3+ years)' : 'Middle',
           source: this.name,
           sourceUrl: link,

@@ -62,12 +62,13 @@ export class JobsGeScraper extends BaseScraper {
             lower.includes('remote') ? 'remote' : lower.includes('hybrid') ? 'hybrid' : 'office';
 
           const spec = this.matchSpecialization(title);
+          const description = `IT Position for ${title} at ${company} in ${locationText}. Open for Georgia, CIS, and Remote workers.`;
 
           vacancies.push({
             id: `jobsge-${Math.abs(this.hashCode(fullUrl))}`,
             title,
             company,
-            description: `IT Position for ${title} at ${company} in ${locationText}. Open for Georgia, CIS, and Remote workers.`,
+            description,
             location: locationText,
             country: 'GE',
             employmentType,
@@ -76,7 +77,7 @@ export class JobsGeScraper extends BaseScraper {
               currency: 'USD',
               isNegotiable: true,
             },
-            requirements: ['JavaScript / TypeScript', 'React / Vue / Node.js', 'English / Russian'],
+            requirements: this.extractRequirements(title, description),
             experience: lower.includes('senior') ? 'Senior (3+ years)' : lower.includes('junior') ? 'Junior' : 'Middle (1-3 years)',
             source: this.name,
             sourceUrl: fullUrl,
