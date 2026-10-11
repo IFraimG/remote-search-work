@@ -1,0 +1,25 @@
+{
+  "name": "remote-search-work",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Job search aggregation platform for Armenia, Serbia, Remote Europe/USA/CIS, and Couriers",
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./backend --filter ./frontend dev",
+    "dev:backend": "pnpm --filter ./backend dev",
+    "dev:frontend": "pnpm --filter ./frontend dev",
+    "build": "pnpm --recursive run build",
+    "build:backend": "pnpm --filter ./backend build",
+    "build:frontend": "pnpm --filter ./frontend build",
+    "lint": "pnpm --filter ./backend lint && pnpm --filter ./frontend lint",
+    "lint:frontend:js": "pnpm --filter ./frontend lint:js",
+    "lint:frontend:style": "pnpm --filter ./frontend lint:style",
+    "typecheck": "pnpm --filter ./backend typecheck && pnpm --filter ./frontend typecheck",
+    "typecheck:frontend": "pnpm --filter ./frontend typecheck",
+    "typecheck:backend": "pnpm --filter ./backend typecheck",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

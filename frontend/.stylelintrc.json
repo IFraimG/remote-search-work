@@ -1,0 +1,45 @@
+{
+  "extends": [
+    "stylelint-config-standard-scss",
+    "stylelint-config-standard-vue/scss"
+  ],
+  "rules": {
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen",
+          "use",
+          "forward",
+          "mixin",
+          "include"
+        ]
+      }
+    ],
+    "scss/at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen"
+        ]
+      }
+    ],
+    "selector-class-pattern": null,
+    "no-descending-specificity": null,
+    "scss/operator-no-newline-after": null,
+    "media-feature-range-notation": null,
+    "color-hex-length": null,
+    "alpha-value-notation": null,
+    "scss/dollar-variable-empty-line-before": null,
+    "scss/load-partial-extension": null,
+    "font-family-name-quotes": null
+  }
+}

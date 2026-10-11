@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: remote-search-work-backend
+    runtime: node
+    plan: free
+    region: frankfurt
+    buildCommand: corepack enable && pnpm install --filter backend... && pnpm --filter backend build
+    startCommand: pnpm --filter backend start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: SCRAPER_INTERVAL_MINUTES
+        value: 10
+      - key: CACHE_TTL_SECONDS
+        value: 600
+      - key: CORS_ORIGIN
+        value: "*"
