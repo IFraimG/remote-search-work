@@ -80,7 +80,7 @@ export class RemoteRocketshipScraper extends BaseScraper {
             min: 90000,
             max: 175000,
           },
-          requirements: ['React / Vue / TypeScript', 'REST APIs & Modern Web Architecture', 'Autonomous work'],
+          requirements: this.extractRequirements(title, `Remote job opening for ${title} at ${company}. Distributed team, flexible hours.`),
           experience: lower.includes('senior') ? 'Senior' : 'Mid / Senior',
           source: this.name,
           sourceUrl: fullUrl,

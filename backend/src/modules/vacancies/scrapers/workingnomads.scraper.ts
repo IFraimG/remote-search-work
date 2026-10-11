@@ -105,7 +105,7 @@ export class WorkingNomadsScraper extends BaseScraper {
             min: 80000,
             max: 160000,
           },
-          requirements: ['JavaScript / TypeScript', 'React / Vue / Node.js', 'Remote team collaboration'],
+          requirements: this.extractRequirements(title, cleanDesc, item.tags),
           experience: lower.includes('senior') ? 'Senior (4+ years)' : lower.includes('lead') ? 'Lead' : 'Mid / Senior',
           source: this.name,
           sourceUrl: item.url.startsWith('http') ? item.url : `https://www.workingnomads.com/jobs/${item.url}`,

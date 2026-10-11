@@ -102,10 +102,7 @@ export abstract class LinkedInBaseScraper extends BaseScraper {
               currency: cur,
               isNegotiable: true,
             },
-            requirements:
-              this.category === 'courier'
-                ? ['Водительское удостоверение / личный транспорт', 'Ответственность и пунктуальность', 'Знание города']
-                : ['Опыт разработки ПО', 'Профильные технологии (стек вакансии)', 'Английский язык'],
+            requirements: this.extractRequirements(title, locationText),
             experience: lower.includes('senior') ? 'Senior (3+ years)' : lower.includes('junior') ? 'Junior' : 'Middle',
             source: this.name,
             sourceUrl: cleanLink,

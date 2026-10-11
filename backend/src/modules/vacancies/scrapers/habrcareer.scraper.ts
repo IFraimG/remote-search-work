@@ -73,12 +73,18 @@ export class HabrCareerScraper extends BaseScraper {
           const targetCis = item.country;
           const locName = item.label;
 
+          const skills = $el
+            .find('.vacancy-card__skills a, [class*="skills"] a')
+            .map((_, s) => $(s).text().trim())
+            .get()
+            .filter(Boolean);
+
           if (!vacancies.some((v) => v.sourceUrl === sourceUrl)) {
             vacancies.push({
               id,
               title,
               company,
-              description: `Удаленная позиция ${title} в компании ${company} (${locName}). Подробности вакансии на Хабр Карьере.`,
+              description: `Удаленная позиция ${title} в компании ${company} (${locName}). Стек: ${skills.join(', ') || 'Web Technologies'}. Подробности вакансии на Хабр Карьере.`,
               location: `${locName} (Удаленно)`,
               country: targetCis,
               employmentType: 'remote' as EmploymentType,
@@ -93,10 +99,7 @@ export class HabrCareerScraper extends BaseScraper {
                   : 'USD',
                 isNegotiable: !salaryText,
               },
-              requirements: [
-                'Опыт коммерческой веб-разработки',
-                'Уверенное владение современным стеком и Git',
-              ],
+              requirements: this.extractRequirements(title, metaText, skills),
               experience: metaText.includes('Senior')
                 ? 'Senior (4+ года)'
                 : metaText.includes('Junior')

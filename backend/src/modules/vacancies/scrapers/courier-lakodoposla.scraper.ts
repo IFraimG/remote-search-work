@@ -78,7 +78,7 @@ export class CourierLakoDoPoslaScraper extends BaseScraper {
               min: 80000,
               max: 150000,
             },
-            requirements: ['Водительские права / велосипед / скутер', 'Знание города', 'Ответственность'],
+            requirements: this.extractRequirements(title, snippet),
             experience: 'Без опыта / приветствуется опыт вождения',
             source: this.name,
             sourceUrl: fullUrl,

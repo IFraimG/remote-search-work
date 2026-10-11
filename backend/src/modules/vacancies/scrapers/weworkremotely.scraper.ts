@@ -102,9 +102,11 @@ export class WeWorkRemotelyScraper extends BaseScraper {
                 currency: salaryRaw.includes('€') ? 'EUR' : 'USD',
                 isNegotiable: !salaryMatch,
               },
-              requirements: skills
-                ? skills.split(',').map((s) => s.trim()).slice(0, 4)
-                : ['Опыт создания современных веб-приложений', 'Опыт работы в распределенной команде'],
+              requirements: this.extractRequirements(
+                title,
+                rawDesc,
+                skills ? skills.split(',').map((s) => s.trim()) : undefined
+              ),
               experience: title.toLowerCase().includes('senior')
                 ? 'Senior (4+ года)'
                 : title.toLowerCase().includes('junior')

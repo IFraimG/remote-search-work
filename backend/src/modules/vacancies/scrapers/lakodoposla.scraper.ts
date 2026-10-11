@@ -88,7 +88,7 @@ export class LakoDoPoslaScraper extends BaseScraper {
               currency: 'RSD',
               isNegotiable: true,
             },
-            requirements: ['JavaScript / TypeScript', 'Web Development', 'Timski rad'],
+            requirements: this.extractRequirements(title, snippet),
             experience: lower.includes('senior') ? 'Senior (3+ god)' : lower.includes('junior') ? 'Junior' : 'Medior',
             source: this.name,
             sourceUrl: fullUrl,

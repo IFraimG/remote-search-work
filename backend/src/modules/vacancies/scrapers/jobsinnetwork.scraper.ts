@@ -76,7 +76,7 @@ export class JobsinNetworkScraper extends BaseScraper {
               currency: 'EUR',
               isNegotiable: true,
             },
-            requirements: ['English (Fluent)', 'Software Development', 'Modern Web Stack'],
+            requirements: this.extractRequirements(title, description),
             experience: '2-4+ years',
             source: this.name,
             sourceUrl: fullUrl,

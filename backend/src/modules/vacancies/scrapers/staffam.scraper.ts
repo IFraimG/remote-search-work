@@ -14,6 +14,7 @@ interface StaffAmJobItem {
   category?: { code?: string; title?: { en?: string; ru?: string } };
   slug?: { en?: string; ru?: string; am?: string };
   activated_at?: { staffam?: string };
+  skills?: Array<{ title?: { en?: string; ru?: string } } | string>;
 }
 
 export class StaffAmScraper extends BaseScraper {
@@ -77,6 +78,11 @@ export class StaffAmScraper extends BaseScraper {
 
             const empType: EmploymentType = item.is_remote ? 'remote' : 'office';
             const spec = this.matchSpecialization(title);
+            const extractedSkills = Array.isArray(item.skills)
+              ? item.skills
+                  .map((s) => (typeof s === 'string' ? s : s.title?.en || s.title?.ru || ''))
+                  .filter(Boolean)
+              : [];
             const id = `staffam_${item.id}`;
 
             if (!vacancies.some((v) => v.sourceUrl === sourceUrl)) {
@@ -96,10 +102,7 @@ export class StaffAmScraper extends BaseScraper {
                   max: item.salary_to || undefined,
                   isNegotiable: !item.salary_from && !item.salary_to,
                 },
-                requirements: [
-                  'Опыт коммерческой веб-разработки',
-                  'Знание современного стека технологий и фреймворков',
-                ],
+                requirements: this.extractRequirements(title, `${title} at ${company}`, extractedSkills),
                 experience: title.toLowerCase().includes('senior')
                   ? 'Senior (3+ года)'
                   : title.toLowerCase().includes('junior')

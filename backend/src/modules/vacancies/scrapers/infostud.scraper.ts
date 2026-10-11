@@ -100,10 +100,7 @@ export class InfostudScraper extends BaseScraper {
                 currency: rawSalary.includes('EUR') || rawSalary.includes('€') ? 'EUR' : 'RSD',
                 isNegotiable: !rawSalary,
               },
-              requirements: [
-                'Iskustvo u relevantnim web tehnologijama',
-                'Poznavanje modernih JS/TS radnih okvira',
-              ],
+              requirements: this.extractRequirements(title, rawDesc),
               experience: fullText.includes('senior')
                 ? 'Senior (3+ god)'
                 : fullText.includes('junior')

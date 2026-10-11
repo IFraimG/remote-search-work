@@ -81,7 +81,7 @@ export class CareerCenterScraper extends BaseScraper {
             currency: 'AMD',
             isNegotiable: true,
           },
-          requirements: ['Web Technologies', 'Software Engineering', 'Analytical skills'],
+          requirements: this.extractRequirements(title, `Career opportunity for ${title} at ${company}. Open for candidates in Armenia and Remote.`),
           experience: lower.includes('senior') ? 'Senior (3+ years)' : '1-3 years',
           source: this.name,
           sourceUrl: fullUrl,
