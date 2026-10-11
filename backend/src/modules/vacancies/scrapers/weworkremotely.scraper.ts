@@ -5,25 +5,25 @@ import { Vacancy, EmploymentType } from '../types.js';
 
 export class WeWorkRemotelyScraper extends BaseScraper {
   readonly id = 'weworkremotely_global';
-  readonly name = 'WeWorkRemotely (EU & US Remote)';
+  readonly name = 'We Work Remotely (Global Remote)';
   readonly targetCountry = 'global_remote';
   readonly category = 'it';
 
   protected async scrape(): Promise<Vacancy[]> {
     const vacancies: Vacancy[] = [];
-    const urls = [
-      'https://weworkremotely.com/categories/remote-front-end-programming-jobs',
-      'https://weworkremotely.com/categories/remote-full-stack-programming-jobs',
+    const feeds = [
+      'https://weworkremotely.com/categories/remote-front-end-programming-jobs.rss',
+      'https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss',
     ];
 
-    for (const url of urls) {
+    for (const feedUrl of feeds) {
       try {
-        const { statusCode, body } = await request(url, {
+        const { statusCode, body } = await request(feedUrl, {
           method: 'GET',
           headers: {
             'User-Agent':
               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            Accept: 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8',
           },
           headersTimeout: 10000,
           bodyTimeout: 10000,
@@ -31,82 +31,96 @@ export class WeWorkRemotelyScraper extends BaseScraper {
 
         if (statusCode !== 200) continue;
 
-        const html = await body.text();
-        const $ = cheerio.load(html);
+        const xml = await body.text();
+        const $ = cheerio.load(xml, { xmlMode: true });
 
-        $('section.jobs article ul li:not(.view-all)').each((_, el) => {
-          const $el = $(el);
-          const link = $el.find('a[href*="/remote-jobs/"]').last();
-          const linkHref = link.attr('href');
-          if (!linkHref) return;
+        $('item').each((_, item) => {
+          const $item = $(item);
+          const rawTitle = this.cleanText($item.find('title').first().text());
+          const link = this.cleanText($item.find('link').first().text());
+          if (!rawTitle || !link) return;
 
-          const sourceUrl = linkHref.startsWith('http')
-            ? linkHref
-            : `https://weworkremotely.com${linkHref}`;
+          // Title often formatted as: "Company: Job Title"
+          let company = 'Tech Company';
+          let title = rawTitle;
+          if (rawTitle.includes(':')) {
+            const parts = rawTitle.split(':');
+            company = parts[0].trim();
+            title = parts.slice(1).join(':').trim();
+          }
 
-          const title = this.cleanText($el.find('.title').first().text());
-          if (!title) return;
+          const region = this.cleanText($item.find('region').first().text()) || 'Anywhere in the World';
+          const skills = this.cleanText($item.find('skills').first().text());
+          const descriptionHtml = $item.find('description').first().text();
 
-          const company = this.cleanText($el.find('.company').first().text()) || 'Remote Company';
-          const region = this.cleanText($el.find('.region').first().text()) || 'Anywhere in the World';
+          // Extract clean text from description HTML
+          const desc$ = cheerio.load(descriptionHtml);
+          const rawDesc = this.cleanText(desc$('p').text()) || `Remote position for ${title} at ${company}.`;
 
           const locLower = (region + ' ' + title).toLowerCase();
           let country = 'global_remote';
           if (locLower.includes('usa') || locLower.includes('us only') || locLower.includes('americas')) {
             country = 'usa';
-          } else if (locLower.includes('germany')) {
+          } else if (locLower.includes('germany') || locLower.includes('berlin')) {
             country = 'germany';
-          } else if (locLower.includes('uk') || locLower.includes('london')) {
+          } else if (locLower.includes('uk') || locLower.includes('united kingdom') || locLower.includes('london')) {
             country = 'uk';
-          } else if (locLower.includes('netherlands')) {
+          } else if (locLower.includes('netherlands') || locLower.includes('amsterdam')) {
             country = 'netherlands';
-          } else if (locLower.includes('poland')) {
+          } else if (locLower.includes('poland') || locLower.includes('warsaw')) {
             country = 'poland';
-          } else if (locLower.includes('france')) {
+          } else if (locLower.includes('france') || locLower.includes('paris')) {
             country = 'france';
-          } else if (locLower.includes('spain')) {
+          } else if (locLower.includes('spain') || locLower.includes('madrid')) {
             country = 'spain';
           } else if (locLower.includes('europe') || locLower.includes('eu only')) {
-            country = 'poland';
+            country = 'germany';
           }
 
-          const spec = this.matchSpecialization(title);
-          const id = `wwr_${Buffer.from(sourceUrl).toString('base64url').slice(-24)}`;
+          // Check for salary pattern in description e.g. "$80,000 - $120,000"
+          let salaryRaw = 'Конкурентная ставка';
+          const salaryMatch = descriptionHtml.match(/(\$[\d,]+(?:\s*[-–]\s*[$]?[\d,]+)?)/);
+          if (salaryMatch) {
+            salaryRaw = salaryMatch[1];
+          }
 
-          if (!vacancies.some((v) => v.sourceUrl === sourceUrl)) {
+          const spec = this.matchSpecialization(title + ' ' + skills);
+          const id = `wwr_${Buffer.from(link).toString('base64url').slice(-24)}`;
+
+          if (!vacancies.some((v) => v.sourceUrl === link)) {
             vacancies.push({
               id,
               title,
               company,
-              description: `Remote job for ${title} at ${company}. Open for candidates in ${region}. Listed on We Work Remotely.`,
+              description: rawDesc.slice(0, 300) + '...',
               location: region,
               country,
+              city: undefined,
               employmentType: 'remote' as EmploymentType,
               salary: {
-                raw: 'Competitive compensation',
-                currency: country === 'usa' ? 'USD' : 'EUR',
-                isNegotiable: true,
+                raw: salaryRaw,
+                currency: salaryRaw.includes('€') ? 'EUR' : 'USD',
+                isNegotiable: !salaryMatch,
               },
-              requirements: [
-                'Experience building high-performance web applications',
-                'Strong communication skills in distributed teams',
-              ],
+              requirements: skills
+                ? skills.split(',').map((s) => s.trim()).slice(0, 4)
+                : ['Опыт создания современных веб-приложений', 'Опыт работы в распределенной команде'],
               experience: title.toLowerCase().includes('senior')
-                ? 'Senior (4+ years)'
-                : title.toLowerCase().includes('lead')
-                ? 'Lead Developer'
-                : 'Mid-Senior (3+ years)',
-              source: 'WeWorkRemotely',
-              sourceUrl,
+                ? 'Senior (4+ года)'
+                : title.toLowerCase().includes('junior')
+                ? 'Junior (1+ год)'
+                : 'Middle (2+ года)',
+              source: 'We Work Remotely',
+              sourceUrl: link,
               category: 'it',
               specialization: spec,
-              tags: ['Remote', 'WeWorkRemotely', spec],
+              tags: ['Remote', 'WeWorkRemotely', spec, country.toUpperCase()],
               scrapedAt: new Date().toISOString(),
             });
           }
         });
-      } catch (err) {
-        console.warn(`WeWorkRemotely scrape error on ${url}:`, err instanceof Error ? err.message : err);
+      } catch (e) {
+        console.warn(`WeWorkRemotely RSS error for ${feedUrl}:`, e instanceof Error ? e.message : e);
       }
     }
 
